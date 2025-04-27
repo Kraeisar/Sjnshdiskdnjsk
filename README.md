@@ -1,1 +1,64 @@
-,nil,nil;(function() _msec=(function(l,b,o)local X=b[(0x1076/49)];local E=o[l[(-58+0x2b0)]][l[(1570-0x345)]];local S=(0x49+-69)/((0x1d4+(-0x61+29))/0xc8)local w=(((0x997-1255)/0xc)-0x62)-(0x6e-109)local v=o[l[(386-0xf1)]][l[(528-0x136)]];local N=(0x47-(0xfd-(-0x3d+244)))+(0x57-85)local n=o[l[(0x13434/150)]][l[(0x176be/118)]]local h=(33-0x1f)-(39+((264/0x6)-0x52))local x=((-0x33+(-2856/(9996/0x62)))+0x53)local D=((((50+(-3857/0xcb))+-0x36)+0x3cf)/0xee)local _=(0x304/(-64+(24929/(0x590b/235))))local c=(468/((0x195+(0x2b+-107))-224))local i=(-22+(0x7c-((312228/0xb1)/0x12)))local U=((30600/(-127+(826-(965-0x1eb))))/0x22)local B=(22-(0x42-((-1691/0x13)+0x88)))local O=((-0x1430/(264-((0xb842/106)-0x101)))+0x47)local e=(55+(-0x28d4/((-84+-0x2b)+328)))local K=(0x2bb/(((0x1ac+-63)+-0x24)+-96))local H=((0x103e/(-33+(361-0xca)))+-30)local d=(((-134+(-0x38-10))+83)+120)local m=(46/(0xa2-(0x194-(0x129+-32))))local P=(104…
+--[[ 
+Script Celestial Ascension Android v3.0
+Funciona mesmo se nada aparecer na tela
+]]
+
+-- CONFIGURAÇÕES (ALTERE COM SUAS COORDENADAS)
+local coordAtaque = {x = 500, y = 1200}    -- Toque no ataque básico
+local coordPocao = {x = 300, y = 1800}     -- Toque na poção de vida 
+local coordBuff = {x = 700, y = 1800}      -- Toque no buff de ataque
+
+-- TIMERS (em milissegundos)
+local tempoFarm = 2500    -- A cada 2.5 segundos
+local tempoBuff = 180000  -- A cada 3 minutos
+local tempoCura = 1000    -- Verifica vida a cada 1s
+
+-- NÃO ALTERAR ABAIXO
+local ativo = false
+local timerFarm, timerBuff, timerCura
+
+-- FUNÇÃO PRINCIPAL
+function main()
+    if ativo then
+        -- Rotina de ataque
+        touchDown(coordAtaque.x, coordAtaque.y)
+        sleep(math.random(80, 120))  -- Toque mais humano
+        touchUp()
+        
+        -- Verificação de emergência
+        if isScreenBlack() then      -- Previne bugs em loading
+            stopScript()
+        end
+    end
+end
+
+-- SISTEMA AUTOMÁTICO DE CURA
+function autoCura()
+    local corPixel = getColor(coordPocao.x, coordPocao.y) -- Cor do ícone de poção
+    
+    -- Se o ícone estiver ativo (mudar para o valor HEX da cor)
+    if corPixel == 0xFF0000 then     -- Substitua pela cor real do ícone
+        touchDown(coordPocao.x, coordPocao.y)
+        sleep(100)
+        touchUp()
+    end
+end
+
+-- ATIVAÇÃO/DESATIVAÇÃO
+setKeyCallback("VOLUME_DOWN", function()  -- Usa botão físico
+    ativo = not ativo
+    toast(ativo and "🟢 SCRIPT ATIVADO" or "🔴 SCRIPT DESATIVADO")
+    
+    if ativo then
+        timerFarm = setInterval(main, tempoFarm)
+        timerBuff = setInterval(buffAuto, tempoBuff)
+        timerCura = setInterval(autoCura, tempoCura)
+    else
+        clearInterval(timerFarm)
+        clearInterval(timerBuff)
+        clearInterval(timerCura)
+    end
+end)
+
+-- MENSAGEM INICIAL
+toast("Script pronto! Pressione VOLUME DOWN para ativar", 3000)
